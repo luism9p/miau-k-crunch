@@ -1,0 +1,326 @@
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Nunito', system-ui, sans-serif;
+  background: #C41E3A;
+  color: #2a1416;
+}
+a { color: #C41E3A; }
+a:hover { color: #9d1730; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, textarea { font-family: inherit; }
+
+@keyframes miauPop { 0% { transform: scale(.8); opacity: 0; } 60% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes miauSlide { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes miauBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes miauFloat { from { transform: translateY(120%); } to { transform: translateY(0); } }
+@keyframes miauCheck { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+.miau-scroll::-webkit-scrollbar { width: 0; height: 0; }
+
+.miau-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  background: radial-gradient(120% 60% at 50% 0%, #d84258 0%, #C41E3A 45%, #9d1730 100%);
+}
+.miau-app {
+  width: 100%;
+  max-width: 440px;
+  min-height: 100vh;
+  background: #FFF9F5;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 60px rgba(0, 0, 0, .25);
+  overflow: hidden;
+}
+
+/* HEADER */
+.miau-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: #fff;
+  border-bottom: 2px solid #ffe0e6;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.miau-header-logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  flex: none;
+  filter: drop-shadow(0 2px 3px rgba(196, 30, 58, .18));
+}
+.miau-header-title { flex: 1; min-width: 0; }
+.miau-brand {
+  font-family: 'Fredoka';
+  font-weight: 700;
+  font-size: 17px;
+  color: #C41E3A;
+  line-height: 1;
+  letter-spacing: .3px;
+}
+.miau-tagline {
+  font-size: 11px;
+  font-weight: 600;
+  color: #c58f97;
+  margin-top: 2px;
+}
+.miau-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.miau-status-dot { width: 7px; height: 7px; border-radius: 999px; }
+
+/* CLOSED BANNER */
+.miau-closed {
+  background: #FFF0D6;
+  border-bottom: 1px solid #f4d9a6;
+  color: #8a5a12;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 9px 16px;
+  line-height: 1.35;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+/* PROGRESS */
+.miau-progress-wrap { padding: 11px 16px 4px; }
+.miau-progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.miau-progress-label { font-size: 11.5px; font-weight: 800; color: #C41E3A; letter-spacing: .3px; }
+.miau-progress-step { font-size: 11.5px; font-weight: 700; color: #c58f97; }
+.miau-progress-track { height: 7px; border-radius: 999px; background: #ffe0e6; overflow: hidden; }
+.miau-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e0576d, #C41E3A);
+  transition: width .35s cubic-bezier(.4, 1.3, .5, 1);
+}
+
+/* BODY */
+.miau-scroll { flex: 1; overflow-y: auto; padding: 0 16px 130px; }
+
+/* STEP: WELCOME */
+.miau-welcome { animation: miauSlide .4s both; padding-top: 14px; text-align: center; }
+.miau-welcome-logo {
+  width: 210px; height: 210px; object-fit: contain; margin: 6px auto 0; display: block;
+  animation: miauBob 4s ease-in-out infinite;
+}
+.miau-welcome h1 {
+  font-family: 'Fredoka'; font-weight: 700; font-size: 30px; color: #C41E3A;
+  margin: 4px 0 2px; line-height: 1.05;
+}
+.miau-welcome p {
+  font-size: 15px; font-weight: 600; color: #8a6a6e; margin: 8px 22px 0; line-height: 1.4;
+}
+.miau-schedule-card {
+  background: #fff; border: 2px solid #ffe0e6; border-radius: 20px; padding: 15px 18px;
+  margin: 22px 4px 0; text-align: left; box-shadow: 0 6px 18px rgba(196, 30, 58, .06);
+}
+.miau-schedule-title {
+  font-family: 'Fredoka'; font-weight: 700; font-size: 13px; color: #C41E3A;
+  letter-spacing: .4px; margin-bottom: 9px; display: flex; align-items: center; gap: 6px;
+}
+.miau-schedule-row {
+  display: flex; justify-content: space-between; font-size: 13.5px; font-weight: 700;
+  color: #5a3d41; padding: 3px 0;
+}
+.miau-schedule-row.closed { color: #c58f97; }
+.miau-start-btn {
+  width: 100%; margin-top: 22px; background: linear-gradient(180deg, #e0576d, #C41E3A);
+  color: #fff; font-family: 'Fredoka'; font-weight: 700; font-size: 19px; padding: 17px;
+  border-radius: 18px; box-shadow: 0 8px 20px rgba(196, 30, 58, .35); animation: miauPop .5s both;
+}
+.miau-social {
+  display: flex; justify-content: center; gap: 16px; margin-top: 16px;
+  font-size: 12px; font-weight: 700; color: #c58f97;
+}
+
+/* STEP: NAME */
+.miau-name-step { animation: miauSlide .35s both; padding-top: 26px; }
+.miau-name-emoji { font-size: 40px; text-align: center; }
+.miau-name-step h2 {
+  font-family: 'Fredoka'; font-weight: 700; font-size: 25px; color: #C41E3A;
+  text-align: center; margin: 6px 0 4px;
+}
+.miau-name-step p {
+  text-align: center; font-size: 14px; font-weight: 600; color: #8a6a6e; margin: 0 20px 22px;
+}
+.miau-input {
+  width: 100%; padding: 16px 18px; font-size: 17px; font-weight: 700; color: #2a1416;
+  background: #fff; border: 2.5px solid #ffe0e6; border-radius: 16px; outline: none;
+}
+.miau-input.error { border-color: #C41E3A; }
+.miau-textarea {
+  width: 100%; padding: 14px 16px; font-size: 15px; font-weight: 600; color: #2a1416;
+  background: #fff; border: 2.5px solid #ffe0e6; border-radius: 16px; outline: none; resize: none;
+}
+.miau-textarea.error { border-color: #C41E3A; }
+.miau-error { color: #C41E3A; font-size: 13px; font-weight: 800; margin-top: 9px; padding-left: 4px; }
+
+/* STEP: CATALOG */
+.miau-catalog { animation: miauSlide .35s both; padding-top: 14px; }
+.miau-catalog h2 { font-family: 'Fredoka'; font-weight: 700; font-size: 22px; color: #C41E3A; margin: 0 0 2px; }
+.miau-catalog > p { font-size: 13px; font-weight: 600; color: #8a6a6e; margin: 0 0 12px; }
+.miau-cats {
+  display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px 14px; padding: 2px 16px 4px;
+  scroll-snap-type: x proximity;
+}
+.miau-cat-btn {
+  flex: none; scroll-snap-align: start; padding: 9px 15px; border-radius: 999px;
+  font-family: Fredoka; font-weight: 600; font-size: 13.5px; white-space: nowrap; transition: all .2s;
+  background: #fff; color: #8a6a6e; border: 2px solid #ffe0e6;
+}
+.miau-cat-btn.active { color: #fff; border: none; box-shadow: 0 4px 12px rgba(196, 30, 58, .3); }
+.miau-products { display: flex; flex-direction: column; gap: 11px; }
+.miau-product-card {
+  display: flex; align-items: center; gap: 12px; background: #fff;
+  border: 2px solid #ffe0e6; border-radius: 18px; padding: 11px 13px; transition: border-color .2s;
+}
+.miau-product-thumb {
+  width: 52px; height: 52px; flex: none; border-radius: 13px;
+  background: repeating-linear-gradient(45deg, #fff0d9, #fff0d9 6px, #ffe6c2 6px, #ffe6c2 12px);
+  display: flex; align-items: center; justify-content: center;
+}
+.miau-product-thumb span { font-family: ui-monospace, Menlo, monospace; font-size: 9px; font-weight: 700; color: #c99; opacity: .85; }
+.miau-product-info { flex: 1; min-width: 0; }
+.miau-product-name { font-family: 'Fredoka'; font-weight: 600; font-size: 15.5px; color: #2a1416; line-height: 1.1; }
+.miau-product-price { font-size: 13px; font-weight: 800; color: #C41E3A; margin-top: 3px; }
+.miau-product-controls { display: flex; align-items: center; gap: 9px; flex: none; }
+.miau-qty-btn {
+  width: 36px; height: 36px; border-radius: 12px; font-size: 24px; font-weight: 700;
+  line-height: 1; transition: all .15s; background: #f4eceb; color: #d8c4c6;
+}
+.miau-qty-btn.active { background: #ffe0e6; color: #C41E3A; }
+.miau-qty-inc {
+  width: 36px; height: 36px; border-radius: 12px; background: #C41E3A; color: #fff;
+  font-size: 22px; font-weight: 700; line-height: 1; box-shadow: 0 3px 8px rgba(196, 30, 58, .28);
+}
+.miau-qty-val { min-width: 16px; text-align: center; font-family: 'Fredoka'; font-weight: 700; font-size: 17px; }
+.miau-error-center { color: #C41E3A; font-size: 13px; font-weight: 800; margin-top: 14px; text-align: center; }
+
+/* STEP: CREMAS */
+.miau-cremas-step { animation: miauSlide .35s both; padding-top: 22px; }
+.miau-cremas-step h2 { font-family: 'Fredoka'; font-weight: 700; font-size: 23px; color: #C41E3A; text-align: center; margin: 0 0 3px; }
+.miau-cremas-step > p { text-align: center; font-size: 13.5px; font-weight: 600; color: #8a6a6e; margin: 0 18px 20px; }
+.miau-cremas-list { display: flex; flex-direction: column; gap: 11px; }
+.miau-crema-btn {
+  display: flex; align-items: center; gap: 13px; width: 100%; text-align: left; padding: 14px 16px;
+  border-radius: 16px; transition: all .18s; background: #fff; border: 2.5px solid #ffe0e6; color: #5a3d41;
+}
+.miau-crema-btn.on { background: #fff5f7; border-color: #C41E3A; color: #C41E3A; }
+.miau-crema-box {
+  width: 28px; height: 28px; flex: none; border-radius: 9px; display: flex; align-items: center;
+  justify-content: center; font-size: 17px; font-weight: 800; transition: all .18s;
+  background: #fff; border: 2px solid #ffd0d8; color: transparent;
+}
+.miau-crema-box.on { background: #C41E3A; border: none; color: #fff; }
+.miau-crema-name { font-family: 'Fredoka'; font-weight: 600; font-size: 16.5px; }
+
+/* STEP: ENTREGA */
+.miau-entrega-step { animation: miauSlide .35s both; padding-top: 22px; }
+.miau-entrega-step h2 { font-family: 'Fredoka'; font-weight: 700; font-size: 23px; color: #C41E3A; text-align: center; margin: 0 0 3px; }
+.miau-entrega-step > p { text-align: center; font-size: 13.5px; font-weight: 600; color: #8a6a6e; margin: 0 18px 20px; }
+.miau-mode-row { display: flex; gap: 11px; }
+.miau-mode-btn {
+  flex: 1; padding: 18px 10px; border-radius: 18px; text-align: center; transition: all .18s;
+  background: #fff; border: 2.5px solid #ffe0e6; color: #8a6a6e;
+}
+.miau-mode-btn.selected { background: #fff5f7; border-color: #C41E3A; color: #C41E3A; }
+.miau-mode-icon { font-size: 30px; }
+.miau-mode-label { font-family: 'Fredoka'; font-weight: 700; font-size: 16px; margin-top: 6px; }
+.miau-mode-sub { font-size: 11.5px; font-weight: 600; opacity: .8; margin-top: 2px; }
+.miau-address-wrap { margin-top: 18px; animation: miauSlide .3s both; }
+.miau-address-label { font-size: 13px; font-weight: 800; color: #5a3d41; display: block; margin-bottom: 7px; }
+.miau-address-note { font-size: 12px; font-weight: 600; color: #c58f97; margin-top: 7px; padding-left: 2px; }
+
+/* STEP: RESUMEN */
+.miau-resumen-step { animation: miauSlide .35s both; padding-top: 16px; }
+.miau-resumen-step > h2 { font-family: 'Fredoka'; font-weight: 700; font-size: 23px; color: #C41E3A; margin: 0 0 3px; }
+.miau-resumen-step > p { font-size: 13px; font-weight: 600; color: #8a6a6e; margin: 0 0 16px; }
+.miau-summary-block {
+  width: 100%; text-align: left; background: #fff; border: 2px solid #ffe0e6; border-radius: 16px;
+  padding: 13px 15px; margin-bottom: 11px; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.miau-summary-block-label { font-size: 11px; font-weight: 800; color: #c58f97; letter-spacing: .3px; }
+.miau-summary-block-value { font-family: 'Fredoka'; font-weight: 600; font-size: 16px; color: #2a1416; margin-top: 2px; }
+.miau-summary-block-value.small { font-size: 15px; }
+.miau-summary-edit { font-size: 12px; font-weight: 800; color: #C41E3A; flex: none; }
+.miau-order-block { background: #fff; border: 2px solid #ffe0e6; border-radius: 16px; padding: 13px 15px; margin-bottom: 11px; }
+.miau-order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.miau-order-item {
+  display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-top: 1px solid #fff2f4;
+}
+.miau-order-item-label { font-size: 14px; font-weight: 700; color: #2a1416; }
+.miau-order-item-label b { color: #C41E3A; font-weight: 700; }
+.miau-order-item-total { font-size: 14px; font-weight: 800; color: #5a3d41; flex: none; }
+.miau-total-card {
+  display: flex; justify-content: space-between; align-items: center;
+  background: linear-gradient(180deg, #fff, #fff5f7); border: 2.5px solid #C41E3A; border-radius: 18px; padding: 15px 18px;
+}
+.miau-total-label { font-family: 'Fredoka'; font-weight: 700; font-size: 18px; color: #2a1416; }
+.miau-total-value { font-family: 'Fredoka'; font-weight: 700; font-size: 26px; color: #C41E3A; }
+
+/* STEP: SENT */
+.miau-sent-step { animation: miauSlide .4s both; padding-top: 40px; text-align: center; }
+.miau-sent-check {
+  width: 96px; height: 96px; border-radius: 999px; background: #e7f7ec; display: flex;
+  align-items: center; justify-content: center; margin: 0 auto; animation: miauCheck .5s both;
+}
+.miau-sent-check span { font-size: 52px; }
+.miau-sent-logo { width: 130px; height: 130px; object-fit: contain; margin: 14px auto 0; display: block; animation: miauBob 4s ease-in-out infinite; }
+.miau-sent-step h2 { font-family: 'Fredoka'; font-weight: 700; font-size: 26px; color: #C41E3A; margin: 6px 0 6px; }
+.miau-sent-step > p { font-size: 15px; font-weight: 600; color: #8a6a6e; margin: 0 24px 4px; line-height: 1.45; }
+.miau-sent-hint { font-size: 12.5px; font-weight: 600; color: #c58f97; margin: 16px 24px 0; }
+.miau-wa-link {
+  display: inline-block; margin-top: 8px; color: #128C7E; font-weight: 800; font-size: 14px;
+  text-decoration: none; border: 2px solid #128C7E; border-radius: 14px; padding: 10px 18px;
+}
+.miau-reset-btn { margin-top: 22px; color: #c58f97; font-weight: 800; font-size: 14px; text-decoration: underline; }
+
+/* FLOATING CART */
+.miau-floating-cart {
+  position: absolute; left: 14px; right: 14px; bottom: 82px; z-index: 35;
+  display: flex; align-items: center; gap: 11px; background: #2a1416; color: #fff;
+  border-radius: 16px; padding: 12px 16px; box-shadow: 0 10px 26px rgba(0, 0, 0, .28);
+  animation: miauFloat .35s cubic-bezier(.3, 1.2, .5, 1) both; width: calc(100% - 28px);
+}
+.miau-cart-icon {
+  width: 34px; height: 34px; border-radius: 11px; background: #C41E3A; display: flex;
+  align-items: center; justify-content: center; font-size: 18px; flex: none;
+}
+.miau-cart-text { flex: 1; text-align: left; font-weight: 700; font-size: 13.5px; }
+.miau-cart-sub { font-size: 11px; font-weight: 600; color: #c9a9ad; margin-top: 1px; }
+.miau-cart-total { font-family: 'Fredoka'; font-weight: 700; font-size: 20px; }
+
+/* BOTTOM NAV */
+.miau-bottom-nav {
+  position: sticky; bottom: 0; z-index: 38; background: #fff; border-top: 2px solid #ffe0e6;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 11px;
+}
+.miau-back-btn {
+  flex: none; width: 56px; background: #fff; border: 2px solid #ffd0d8; color: #C41E3A;
+  font-size: 24px; font-weight: 700; border-radius: 16px; line-height: 1;
+}
+.miau-primary-btn {
+  flex: 1; background: linear-gradient(180deg, #e0576d, #C41E3A); color: #fff;
+  font-family: 'Fredoka'; font-weight: 700; font-size: 17px; padding: 16px; border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(196, 30, 58, .28);
+}
