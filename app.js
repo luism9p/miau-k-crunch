@@ -163,7 +163,7 @@
   function renderWelcome() {
     return (
       '<div class="miau-welcome">' +
-      '<img src="assets/miau-logo.png" alt="" class="miau-welcome-logo">' +
+      '<img src="assets/miau-logo.png" alt="" class="miau-welcome-logo" width="210" height="210">' +
       '<h1>¡Hola, gatito<br>hambriento! 🐾</h1>' +
       '<p>Arma tu pedido de banderillas coreanas en pocos taps y te lo mandamos por WhatsApp.</p>' +
       '<div class="miau-schedule-card">' +
@@ -332,7 +332,7 @@
     return (
       '<div class="miau-sent-step">' +
       '<div class="miau-sent-check"><span>✅</span></div>' +
-      '<img src="assets/miau-logo.png" alt="" class="miau-sent-logo">' +
+      '<img src="assets/miau-logo.png" alt="" class="miau-sent-logo" width="130" height="130">' +
       '<h2>¡Pedido enviado!</h2>' +
       '<p>Te contactaremos por WhatsApp muy pronto para confirmar. ¡Gracias, ' + escapeHtml(state.name) + '! 🐾</p>' +
       '<p class="miau-sent-hint">¿No se abrió WhatsApp?</p>' +
@@ -428,6 +428,16 @@
     document.addEventListener('input', function (e) {
       if (e.target.id === 'miau-name-input') { state.name = e.target.value; state.nameError = ''; syncStatusOnly(); }
       else if (e.target.id === 'miau-address-input') { state.address = e.target.value; state.addrError = ''; syncStatusOnly(); }
+    });
+
+    // On mobile the on-screen keyboard can cover the focused field; nudge it
+    // into view once the keyboard has finished animating in.
+    document.addEventListener('focusin', function (e) {
+      if (e.target.id === 'miau-name-input' || e.target.id === 'miau-address-input') {
+        setTimeout(function () {
+          e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }, 300);
+      }
     });
   }
 

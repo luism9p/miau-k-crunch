@@ -1,5 +1,5 @@
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; padding: 0; }
+html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
 body {
   font-family: 'Nunito', system-ui, sans-serif;
   background: #C41E3A;
@@ -7,8 +7,17 @@ body {
 }
 a { color: #C41E3A; }
 a:hover { color: #9d1730; }
-button { font-family: inherit; cursor: pointer; border: none; background: none; }
-input, textarea { font-family: inherit; }
+/* 44x44px is the minimum recommended touch target (WCAG 2.5.5 / iOS HIG).
+   min-width/min-height floor the box even where a smaller width/height is
+   set explicitly further down (e.g. the +/- qty buttons). */
+button {
+  font-family: inherit; cursor: pointer; border: none; background: none;
+  min-width: 44px; min-height: 44px;
+}
+input, textarea {
+  font-family: inherit;
+  font-size: 16px; /* baseline: prevents iOS Safari auto-zoom on focus */
+}
 
 @keyframes miauPop { 0% { transform: scale(.8); opacity: 0; } 60% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
 @keyframes miauSlide { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -19,7 +28,14 @@ input, textarea { font-family: inherit; }
 .miau-scroll::-webkit-scrollbar { width: 0; height: 0; }
 
 .miau-page {
-  min-height: 100vh;
+  /* `height` (not min-height) is required here: the app-shell pattern below
+     (sticky header/nav + internally-scrolling body) only works if this box
+     has a DEFINITE height for flexbox to compute against. With only
+     min-height, the container grows to fit content instead of clipping it
+     to the viewport, and the bottom nav stops being reachable without
+     scrolling the whole page -- very visible on short/landscape screens. */
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   justify-content: center;
   background: radial-gradient(120% 60% at 50% 0%, #d84258 0%, #C41E3A 45%, #9d1730 100%);
@@ -27,16 +43,29 @@ input, textarea { font-family: inherit; }
 .miau-app {
   width: 100%;
   max-width: 440px;
-  min-height: 100vh;
+  height: 100%;
   background: #FFF9F5;
   position: relative;
   display: flex;
   flex-direction: column;
   box-shadow: 0 0 60px rgba(0, 0, 0, .25);
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 /* HEADER */
+/* The header/banner/progress/nav are the shell "chrome": they must keep
+   their natural size and never compete for shrink space with the scrollable
+   body. Without flex:none here, the flexbox shrink algorithm distributes
+   the deficit across ALL siblings with flex-basis:auto (these) while
+   .miau-scroll's flex-basis:0 gives it zero shrink weight -- so on short
+   viewports the chrome would visually spill past the shell's fixed height
+   instead of the body simply scrolling internally. */
+.miau-app > .miau-header,
+.miau-app > #miau-closed-banner,
+.miau-app > #miau-progress,
+.miau-app > #miau-nav {
+  flex: none;
+}
 .miau-header {
   position: sticky;
   top: 0;
@@ -51,6 +80,7 @@ input, textarea { font-family: inherit; }
 .miau-header-logo {
   width: 46px;
   height: 46px;
+  aspect-ratio: 1 / 1;
   object-fit: contain;
   flex: none;
   filter: drop-shadow(0 2px 3px rgba(196, 30, 58, .18));
@@ -59,9 +89,9 @@ input, textarea { font-family: inherit; }
 .miau-brand {
   font-family: 'Fredoka';
   font-weight: 700;
-  font-size: 17px;
+  font-size: clamp(14px, 4.2vw, 17px);
   color: #C41E3A;
-  line-height: 1;
+  line-height: 1.15;
   letter-spacing: .3px;
 }
 .miau-tagline {
@@ -75,6 +105,7 @@ input, textarea { font-family: inherit; }
   align-items: center;
   gap: 5px;
   flex: none;
+  white-space: nowrap;
   padding: 5px 9px;
   border-radius: 999px;
   font-size: 11px;
@@ -100,12 +131,14 @@ input, textarea { font-family: inherit; }
 .miau-progress-wrap { padding: 11px 16px 4px; }
 .miau-progress-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
+  gap: 4px;
   margin-bottom: 6px;
 }
-.miau-progress-label { font-size: 11.5px; font-weight: 800; color: #C41E3A; letter-spacing: .3px; }
-.miau-progress-step { font-size: 11.5px; font-weight: 700; color: #c58f97; }
+.miau-progress-label { font-size: 11.5px; font-weight: 800; color: #C41E3A; letter-spacing: .3px; white-space: nowrap; }
+.miau-progress-step { font-size: 11.5px; font-weight: 700; color: #c58f97; white-space: nowrap; }
 .miau-progress-track { height: 7px; border-radius: 999px; background: #ffe0e6; overflow: hidden; }
 .miau-progress-fill {
   height: 100%;
@@ -115,20 +148,38 @@ input, textarea { font-family: inherit; }
 }
 
 /* BODY */
-.miau-scroll { flex: 1; overflow-y: auto; padding: 0 16px 130px; }
+.miau-scroll {
+  flex: 1;
+  min-height: 0; /* classic flexbox gotcha: without this, a flex:1 child with
+    overflow can refuse to shrink below its content size and spill out of
+    the fixed-height shell on short viewports (e.g. landscape phones) */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px;
+}
+/* The "clear the floating cart + bottom nav" reserve space lives on the
+   step's own content wrapper (always the sole child of .miau-scroll), NOT
+   on .miau-scroll itself: a box's rendered height can never go below its
+   own padding, so putting it here would silently floor .miau-scroll at
+   ~130px tall even when flexbox tries to shrink it further on short/
+   landscape viewports, pushing the bottom nav off-screen. */
+.miau-scroll > * {
+  padding-bottom: calc(130px + env(safe-area-inset-bottom));
+}
 
 /* STEP: WELCOME */
 .miau-welcome { animation: miauSlide .4s both; padding-top: 14px; text-align: center; }
 .miau-welcome-logo {
-  width: 210px; height: 210px; object-fit: contain; margin: 6px auto 0; display: block;
+  width: clamp(150px, 48vw, 210px); height: clamp(150px, 48vw, 210px);
+  aspect-ratio: 1 / 1; object-fit: contain; margin: 6px auto 0; display: block;
   animation: miauBob 4s ease-in-out infinite;
 }
 .miau-welcome h1 {
-  font-family: 'Fredoka'; font-weight: 700; font-size: 30px; color: #C41E3A;
-  margin: 4px 0 2px; line-height: 1.05;
+  font-family: 'Fredoka'; font-weight: 700; font-size: clamp(24px, 7.5vw, 30px); color: #C41E3A;
+  margin: 4px 0 2px; line-height: 1.1;
 }
 .miau-welcome p {
-  font-size: 15px; font-weight: 600; color: #8a6a6e; margin: 8px 22px 0; line-height: 1.4;
+  font-size: 15px; font-weight: 600; color: #8a6a6e; margin: 8px 8px 0; line-height: 1.4;
 }
 .miau-schedule-card {
   background: #fff; border: 2px solid #ffe0e6; border-radius: 20px; padding: 15px 18px;
@@ -139,8 +190,8 @@ input, textarea { font-family: inherit; }
   letter-spacing: .4px; margin-bottom: 9px; display: flex; align-items: center; gap: 6px;
 }
 .miau-schedule-row {
-  display: flex; justify-content: space-between; font-size: 13.5px; font-weight: 700;
-  color: #5a3d41; padding: 3px 0;
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px;
+  font-size: 13.5px; font-weight: 700; color: #5a3d41; padding: 3px 0;
 }
 .miau-schedule-row.closed { color: #c58f97; }
 .miau-start-btn {
@@ -157,7 +208,7 @@ input, textarea { font-family: inherit; }
 .miau-name-step { animation: miauSlide .35s both; padding-top: 26px; }
 .miau-name-emoji { font-size: 40px; text-align: center; }
 .miau-name-step h2 {
-  font-family: 'Fredoka'; font-weight: 700; font-size: 25px; color: #C41E3A;
+  font-family: 'Fredoka'; font-weight: 700; font-size: clamp(21px, 6vw, 25px); color: #C41E3A;
   text-align: center; margin: 6px 0 4px;
 }
 .miau-name-step p {
@@ -166,59 +217,65 @@ input, textarea { font-family: inherit; }
 .miau-input {
   width: 100%; padding: 16px 18px; font-size: 17px; font-weight: 700; color: #2a1416;
   background: #fff; border: 2.5px solid #ffe0e6; border-radius: 16px; outline: none;
+  min-height: 44px;
 }
 .miau-input.error { border-color: #C41E3A; }
 .miau-textarea {
-  width: 100%; padding: 14px 16px; font-size: 15px; font-weight: 600; color: #2a1416;
+  width: 100%; padding: 14px 16px; font-size: 16px; font-weight: 600; color: #2a1416;
   background: #fff; border: 2.5px solid #ffe0e6; border-radius: 16px; outline: none; resize: none;
+  min-height: 44px;
 }
 .miau-textarea.error { border-color: #C41E3A; }
 .miau-error { color: #C41E3A; font-size: 13px; font-weight: 800; margin-top: 9px; padding-left: 4px; }
 
 /* STEP: CATALOG */
 .miau-catalog { animation: miauSlide .35s both; padding-top: 14px; }
-.miau-catalog h2 { font-family: 'Fredoka'; font-weight: 700; font-size: 22px; color: #C41E3A; margin: 0 0 2px; }
+.miau-catalog h2 { font-family: 'Fredoka'; font-weight: 700; font-size: clamp(19px, 5.5vw, 22px); color: #C41E3A; margin: 0 0 2px; }
 .miau-catalog > p { font-size: 13px; font-weight: 600; color: #8a6a6e; margin: 0 0 12px; }
 .miau-cats {
-  display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px 14px; padding: 2px 16px 4px;
+  display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px 14px; padding: 2px 16px 6px;
   scroll-snap-type: x proximity;
 }
 .miau-cat-btn {
-  flex: none; scroll-snap-align: start; padding: 9px 15px; border-radius: 999px;
+  flex: none; scroll-snap-align: start; display: inline-flex; align-items: center; justify-content: center;
+  padding: 9px 15px; min-height: 44px; border-radius: 999px;
   font-family: Fredoka; font-weight: 600; font-size: 13.5px; white-space: nowrap; transition: all .2s;
   background: #fff; color: #8a6a6e; border: 2px solid #ffe0e6;
 }
 .miau-cat-btn.active { color: #fff; border: none; box-shadow: 0 4px 12px rgba(196, 30, 58, .3); }
+/* single-column product list: cards never sit side by side, so they can't get cropped on narrow screens */
 .miau-products { display: flex; flex-direction: column; gap: 11px; }
 .miau-product-card {
   display: flex; align-items: center; gap: 12px; background: #fff;
   border: 2px solid #ffe0e6; border-radius: 18px; padding: 11px 13px; transition: border-color .2s;
 }
 .miau-product-thumb {
-  width: 52px; height: 52px; flex: none; border-radius: 13px;
+  width: 52px; height: 52px; aspect-ratio: 1 / 1; flex: none; border-radius: 13px;
   background: repeating-linear-gradient(45deg, #fff0d9, #fff0d9 6px, #ffe6c2 6px, #ffe6c2 12px);
   display: flex; align-items: center; justify-content: center;
 }
 .miau-product-thumb span { font-family: ui-monospace, Menlo, monospace; font-size: 9px; font-weight: 700; color: #c99; opacity: .85; }
 .miau-product-info { flex: 1; min-width: 0; }
-.miau-product-name { font-family: 'Fredoka'; font-weight: 600; font-size: 15.5px; color: #2a1416; line-height: 1.1; }
+.miau-product-name { font-family: 'Fredoka'; font-weight: 600; font-size: 15.5px; color: #2a1416; line-height: 1.25; overflow-wrap: break-word; }
 .miau-product-price { font-size: 13px; font-weight: 800; color: #C41E3A; margin-top: 3px; }
-.miau-product-controls { display: flex; align-items: center; gap: 9px; flex: none; }
+.miau-product-controls { display: flex; align-items: center; gap: 6px; flex: none; }
 .miau-qty-btn {
-  width: 36px; height: 36px; border-radius: 12px; font-size: 24px; font-weight: 700;
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  border-radius: 14px; font-size: 24px; font-weight: 700;
   line-height: 1; transition: all .15s; background: #f4eceb; color: #d8c4c6;
 }
 .miau-qty-btn.active { background: #ffe0e6; color: #C41E3A; }
 .miau-qty-inc {
-  width: 36px; height: 36px; border-radius: 12px; background: #C41E3A; color: #fff;
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  border-radius: 14px; background: #C41E3A; color: #fff;
   font-size: 22px; font-weight: 700; line-height: 1; box-shadow: 0 3px 8px rgba(196, 30, 58, .28);
 }
-.miau-qty-val { min-width: 16px; text-align: center; font-family: 'Fredoka'; font-weight: 700; font-size: 17px; }
+.miau-qty-val { min-width: 18px; text-align: center; font-family: 'Fredoka'; font-weight: 700; font-size: 17px; }
 .miau-error-center { color: #C41E3A; font-size: 13px; font-weight: 800; margin-top: 14px; text-align: center; }
 
 /* STEP: CREMAS */
 .miau-cremas-step { animation: miauSlide .35s both; padding-top: 22px; }
-.miau-cremas-step h2 { font-family: 'Fredoka'; font-weight: 700; font-size: 23px; color: #C41E3A; text-align: center; margin: 0 0 3px; }
+.miau-cremas-step h2 { font-family: 'Fredoka'; font-weight: 700; font-size: clamp(20px, 5.8vw, 23px); color: #C41E3A; text-align: center; margin: 0 0 3px; }
 .miau-cremas-step > p { text-align: center; font-size: 13.5px; font-weight: 600; color: #8a6a6e; margin: 0 18px 20px; }
 .miau-cremas-list { display: flex; flex-direction: column; gap: 11px; }
 .miau-crema-btn {
@@ -227,20 +284,20 @@ input, textarea { font-family: inherit; }
 }
 .miau-crema-btn.on { background: #fff5f7; border-color: #C41E3A; color: #C41E3A; }
 .miau-crema-box {
-  width: 28px; height: 28px; flex: none; border-radius: 9px; display: flex; align-items: center;
+  width: 28px; height: 28px; aspect-ratio: 1 / 1; flex: none; border-radius: 9px; display: flex; align-items: center;
   justify-content: center; font-size: 17px; font-weight: 800; transition: all .18s;
   background: #fff; border: 2px solid #ffd0d8; color: transparent;
 }
 .miau-crema-box.on { background: #C41E3A; border: none; color: #fff; }
-.miau-crema-name { font-family: 'Fredoka'; font-weight: 600; font-size: 16.5px; }
+.miau-crema-name { font-family: 'Fredoka'; font-weight: 600; font-size: 16.5px; overflow-wrap: break-word; }
 
 /* STEP: ENTREGA */
 .miau-entrega-step { animation: miauSlide .35s both; padding-top: 22px; }
-.miau-entrega-step h2 { font-family: 'Fredoka'; font-weight: 700; font-size: 23px; color: #C41E3A; text-align: center; margin: 0 0 3px; }
-.miau-entrega-step > p { text-align: center; font-size: 13.5px; font-weight: 600; color: #8a6a6e; margin: 0 18px 20px; }
+.miau-entrega-step h2 { font-family: 'Fredoka'; font-weight: 700; font-size: clamp(20px, 5.8vw, 23px); color: #C41E3A; text-align: center; margin: 0 0 3px; }
+.miau-entrega-step > p { text-align: center; font-size: 13.5px; font-weight: 600; color: #8a6a6e; margin: 0 8px 20px; }
 .miau-mode-row { display: flex; gap: 11px; }
 .miau-mode-btn {
-  flex: 1; padding: 18px 10px; border-radius: 18px; text-align: center; transition: all .18s;
+  flex: 1; min-height: 88px; padding: 18px 8px; border-radius: 18px; text-align: center; transition: all .18s;
   background: #fff; border: 2.5px solid #ffe0e6; color: #8a6a6e;
 }
 .miau-mode-btn.selected { background: #fff5f7; border-color: #C41E3A; color: #C41E3A; }
@@ -253,30 +310,34 @@ input, textarea { font-family: inherit; }
 
 /* STEP: RESUMEN */
 .miau-resumen-step { animation: miauSlide .35s both; padding-top: 16px; }
-.miau-resumen-step > h2 { font-family: 'Fredoka'; font-weight: 700; font-size: 23px; color: #C41E3A; margin: 0 0 3px; }
+.miau-resumen-step > h2 { font-family: 'Fredoka'; font-weight: 700; font-size: clamp(20px, 5.8vw, 23px); color: #C41E3A; margin: 0 0 3px; }
 .miau-resumen-step > p { font-size: 13px; font-weight: 600; color: #8a6a6e; margin: 0 0 16px; }
 .miau-summary-block {
   width: 100%; text-align: left; background: #fff; border: 2px solid #ffe0e6; border-radius: 16px;
   padding: 13px 15px; margin-bottom: 11px; display: flex; justify-content: space-between; align-items: center; gap: 10px;
 }
 .miau-summary-block-label { font-size: 11px; font-weight: 800; color: #c58f97; letter-spacing: .3px; }
-.miau-summary-block-value { font-family: 'Fredoka'; font-weight: 600; font-size: 16px; color: #2a1416; margin-top: 2px; }
+.miau-summary-block-value { font-family: 'Fredoka'; font-weight: 600; font-size: 16px; color: #2a1416; margin-top: 2px; overflow-wrap: break-word; }
 .miau-summary-block-value.small { font-size: 15px; }
-.miau-summary-edit { font-size: 12px; font-weight: 800; color: #C41E3A; flex: none; }
+.miau-summary-edit {
+  font-size: 12px; font-weight: 800; color: #C41E3A; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+button.miau-summary-edit { padding: 10px 8px; margin: -10px -8px -10px 0; } /* enlarge tap area without shifting the visible text */
 .miau-order-block { background: #fff; border: 2px solid #ffe0e6; border-radius: 16px; padding: 13px 15px; margin-bottom: 11px; }
 .miau-order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .miau-order-item {
-  display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-top: 1px solid #fff2f4;
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 10px; padding: 5px 0; border-top: 1px solid #fff2f4;
 }
-.miau-order-item-label { font-size: 14px; font-weight: 700; color: #2a1416; }
+.miau-order-item-label { font-size: 14px; font-weight: 700; color: #2a1416; overflow-wrap: break-word; }
 .miau-order-item-label b { color: #C41E3A; font-weight: 700; }
 .miau-order-item-total { font-size: 14px; font-weight: 800; color: #5a3d41; flex: none; }
 .miau-total-card {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px;
   background: linear-gradient(180deg, #fff, #fff5f7); border: 2.5px solid #C41E3A; border-radius: 18px; padding: 15px 18px;
 }
 .miau-total-label { font-family: 'Fredoka'; font-weight: 700; font-size: 18px; color: #2a1416; }
-.miau-total-value { font-family: 'Fredoka'; font-weight: 700; font-size: 26px; color: #C41E3A; }
+.miau-total-value { font-family: 'Fredoka'; font-weight: 700; font-size: clamp(22px, 6vw, 26px); color: #C41E3A; }
 
 /* STEP: SENT */
 .miau-sent-step { animation: miauSlide .4s both; padding-top: 40px; text-align: center; }
@@ -285,30 +346,39 @@ input, textarea { font-family: inherit; }
   align-items: center; justify-content: center; margin: 0 auto; animation: miauCheck .5s both;
 }
 .miau-sent-check span { font-size: 52px; }
-.miau-sent-logo { width: 130px; height: 130px; object-fit: contain; margin: 14px auto 0; display: block; animation: miauBob 4s ease-in-out infinite; }
-.miau-sent-step h2 { font-family: 'Fredoka'; font-weight: 700; font-size: 26px; color: #C41E3A; margin: 6px 0 6px; }
-.miau-sent-step > p { font-size: 15px; font-weight: 600; color: #8a6a6e; margin: 0 24px 4px; line-height: 1.45; }
+.miau-sent-logo {
+  width: 130px; height: 130px; aspect-ratio: 1 / 1; object-fit: contain;
+  margin: 14px auto 0; display: block; animation: miauBob 4s ease-in-out infinite;
+}
+.miau-sent-step h2 { font-family: 'Fredoka'; font-weight: 700; font-size: clamp(22px, 6.2vw, 26px); color: #C41E3A; margin: 6px 0 6px; }
+.miau-sent-step > p { font-size: 15px; font-weight: 600; color: #8a6a6e; margin: 0 10px 4px; line-height: 1.45; }
 .miau-sent-hint { font-size: 12.5px; font-weight: 600; color: #c58f97; margin: 16px 24px 0; }
 .miau-wa-link {
-  display: inline-block; margin-top: 8px; color: #128C7E; font-weight: 800; font-size: 14px;
-  text-decoration: none; border: 2px solid #128C7E; border-radius: 14px; padding: 10px 18px;
+  display: inline-flex; align-items: center; justify-content: center; min-height: 44px;
+  margin-top: 8px; color: #128C7E; font-weight: 800; font-size: 14px;
+  text-decoration: none; border: 2px solid #128C7E; border-radius: 14px; padding: 12px 18px;
 }
-.miau-reset-btn { margin-top: 22px; color: #c58f97; font-weight: 800; font-size: 14px; text-decoration: underline; }
+.miau-reset-btn {
+  margin-top: 22px; padding: 10px 14px; color: #c58f97; font-weight: 800; font-size: 14px; text-decoration: underline;
+}
 
 /* FLOATING CART */
 .miau-floating-cart {
-  position: absolute; left: 14px; right: 14px; bottom: 82px; z-index: 35;
+  position: absolute; left: 14px; right: 14px;
+  /* sits just above the bottom nav; env() keeps it clear of the iOS home-indicator safe area */
+  bottom: calc(82px + env(safe-area-inset-bottom)); z-index: 35;
   display: flex; align-items: center; gap: 11px; background: #2a1416; color: #fff;
+  min-height: 44px;
   border-radius: 16px; padding: 12px 16px; box-shadow: 0 10px 26px rgba(0, 0, 0, .28);
-  animation: miauFloat .35s cubic-bezier(.3, 1.2, .5, 1) both; width: calc(100% - 28px);
+  animation: miauFloat .35s cubic-bezier(.3, 1.2, .5, 1) both;
 }
 .miau-cart-icon {
-  width: 34px; height: 34px; border-radius: 11px; background: #C41E3A; display: flex;
+  width: 34px; height: 34px; aspect-ratio: 1 / 1; border-radius: 11px; background: #C41E3A; display: flex;
   align-items: center; justify-content: center; font-size: 18px; flex: none;
 }
-.miau-cart-text { flex: 1; text-align: left; font-weight: 700; font-size: 13.5px; }
+.miau-cart-text { flex: 1; min-width: 0; text-align: left; font-weight: 700; font-size: 13.5px; overflow-wrap: break-word; }
 .miau-cart-sub { font-size: 11px; font-weight: 600; color: #c9a9ad; margin-top: 1px; }
-.miau-cart-total { font-family: 'Fredoka'; font-weight: 700; font-size: 20px; }
+.miau-cart-total { font-family: 'Fredoka'; font-weight: 700; font-size: clamp(17px, 5vw, 20px); flex: none; }
 
 /* BOTTOM NAV */
 .miau-bottom-nav {
@@ -316,11 +386,40 @@ input, textarea { font-family: inherit; }
   padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 11px;
 }
 .miau-back-btn {
-  flex: none; width: 56px; background: #fff; border: 2px solid #ffd0d8; color: #C41E3A;
+  flex: none; width: 56px; min-height: 44px; background: #fff; border: 2px solid #ffd0d8; color: #C41E3A;
   font-size: 24px; font-weight: 700; border-radius: 16px; line-height: 1;
 }
 .miau-primary-btn {
-  flex: 1; background: linear-gradient(180deg, #e0576d, #C41E3A); color: #fff;
-  font-family: 'Fredoka'; font-weight: 700; font-size: 17px; padding: 16px; border-radius: 16px;
-  box-shadow: 0 6px 16px rgba(196, 30, 58, .28);
+  flex: 1; min-height: 44px; background: linear-gradient(180deg, #e0576d, #C41E3A); color: #fff;
+  font-family: 'Fredoka'; font-weight: 700; font-size: clamp(15px, 4.4vw, 17px); padding: 16px 10px; border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(196, 30, 58, .28); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ============ SMALL PHONES (iPhone SE / 320-360px) ============ */
+@media (max-width: 360px) {
+  .miau-header { padding: 8px 12px; gap: 8px; }
+  .miau-scroll { padding: 0 12px calc(130px + env(safe-area-inset-bottom)); }
+  .miau-bottom-nav { padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
+  .miau-floating-cart { left: 12px; right: 12px; padding: 10px 12px; gap: 8px; }
+
+  .miau-product-card { padding: 9px 10px; gap: 8px; }
+  .miau-product-thumb { width: 44px; height: 44px; }
+  .miau-product-controls { gap: 4px; }
+  .miau-qty-btn, .miau-qty-inc { width: 44px; height: 44px; } /* keep the 44px touch floor even as everything else tightens */
+
+  .miau-mode-row { gap: 8px; }
+  .miau-cremas-list { gap: 9px; }
+}
+
+/* ============ LANDSCAPE / SHORT VIEWPORTS ============ */
+@media (max-height: 480px) and (orientation: landscape) {
+  .miau-welcome { padding-top: 8px; }
+  .miau-welcome-logo { width: 110px; height: 110px; margin-top: 0; }
+  .miau-schedule-card { margin-top: 12px; padding: 10px 16px; }
+  .miau-start-btn { margin-top: 14px; padding: 13px; }
+
+  .miau-sent-step { padding-top: 16px; }
+  .miau-sent-check { width: 64px; height: 64px; }
+  .miau-sent-check span { font-size: 34px; }
+  .miau-sent-logo { width: 80px; height: 80px; margin-top: 8px; }
 }
