@@ -2,6 +2,15 @@
   'use strict';
 
   var CATS = ['Clásicos', 'Ramen', 'Flaming Hot', 'Papa', 'Bebidas'];
+  // One representative photo per category (all fillings within a category
+  // look the same banderilla from the outside). Bebidas has no photo yet,
+  // so it keeps the plain placeholder thumb.
+  var CATEGORY_IMAGES = {
+    'Clásicos': 'assets/clasico.webp',
+    'Ramen': 'assets/ramen.webp',
+    'Flaming Hot': 'assets/flaming-hot.webp',
+    'Papa': 'assets/papa.webp'
+  };
   var CREMAS = ['Mayonesa', 'Kétchup', 'Bbq', 'Mostaza', 'Rocoto'];
   var PRODUCTS = [
     { id: 'cl-s', cat: 'Clásicos', name: 'Salchicha', price: 10 },
@@ -26,9 +35,20 @@
   var WHATSAPP_NUMBER = '51934963187';
   var STEP_NAMES = { 1: 'Tu nombre', 2: 'Catálogo', 3: 'Cremas', 4: 'Entrega', 5: 'Resumen' };
 
+  var INSTAGRAM_ICON =
+    '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<rect x="2" y="2" width="20" height="20" rx="5.5" stroke="currentColor" stroke-width="2"/>' +
+    '<circle cx="12" cy="12" r="4.3" stroke="currentColor" stroke-width="2"/>' +
+    '<circle cx="17.4" cy="6.6" r="1.15" fill="currentColor"/>' +
+    '</svg>';
+  var TIKTOK_ICON =
+    '<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+    '<path d="M16.6 2h-3.2v13.9c0 1.5-1.2 2.7-2.7 2.7-1.5 0-2.7-1.2-2.7-2.7 0-1.5 1.2-2.7 2.7-2.7.28 0 .55.04.8.12v-3.28a5.9 5.9 0 0 0-.8-.05A5.9 5.9 0 0 0 4.8 15.9 5.9 5.9 0 0 0 10.7 21.8a5.9 5.9 0 0 0 5.9-5.9V8.4a8.3 8.3 0 0 0 4.8 1.53V6.7A5.1 5.1 0 0 1 16.6 2z"/>' +
+    '</svg>';
+
   var state = {
-    step: 0, name: '', qty: {}, cremas: [], mode: '', address: '',
-    activeCat: 'Clásicos', nameError: '', catError: '', addrError: '', waLink: '#'
+    step: 0, name: '', qty: {}, cremas: [], mode: '',
+    activeCat: 'Clásicos', nameError: '', catError: '', modeError: '', waLink: '#'
   };
 
   function setState(patch) {
@@ -49,15 +69,15 @@
   function nextOpenMsg(d) {
     var day = d.getDay(), mins = d.getHours() * 60 + d.getMinutes();
     var todayWin = SCHEDULE[day];
-    if (todayWin && mins < todayWin[0]) return 'Estamos cerrados en este momento. Abrimos hoy a las 6:00pm.';
+    if (todayWin && mins < todayWin[0]) return 'Todavía no abrimos hoy. Abrimos a las 6:00pm — mientras tanto puedes ir armando tu pedido 🐾';
     for (var i = 1; i <= 7; i++) {
       var nd = (day + i) % 7;
       if (SCHEDULE[nd]) {
         var label = i === 1 ? 'mañana' : ('el ' + DAYNAME[nd]);
-        return 'Estamos cerrados en este momento. Abrimos ' + label + ' a las 6:00pm. Igual puedes armar y enviar tu pedido.';
+        return 'Ya cerramos por hoy 😴 Abrimos ' + label + ' a las 6:00pm. Igual puedes armar tu pedido y te escribimos apenas abramos.';
       }
     }
-    return 'Estamos cerrados en este momento.';
+    return 'Estamos cerrados por ahora.';
   }
 
   function statusInfo() {
@@ -82,7 +102,7 @@
     var lines = ['CUÁL SERÍA TU ORDEN?', 'Nombre: ' + state.name.trim(), 'Pedido:'];
     chosen().forEach(function (p) { lines.push(state.qty[p.id] + 'x ' + p.name + ' (' + p.cat + ')'); });
     lines.push('Cremas: ' + (state.cremas.length ? state.cremas.join(', ') : 'Ninguna'));
-    if (state.mode === 'Delivery') lines.push('Recojo o Delivery: Delivery - dirección: ' + state.address.trim());
+    if (state.mode === 'Delivery') lines.push('Recojo o Delivery: Delivery (te comparto mi ubicación actual por WhatsApp)');
     else lines.push('Recojo o Delivery: Recojo');
     lines.push('Total: ' + soles(total()));
     return lines.join('\n');
@@ -100,9 +120,8 @@
     }
     if (st === 3) { setStep(4); return; }
     if (st === 4) {
-      if (!state.mode) { setState({ addrError: 'Elige Recojo o Delivery.' }); return; }
-      if (state.mode === 'Delivery' && !state.address.trim()) { setState({ addrError: 'Ingresa tu dirección de entrega.' }); return; }
-      setState({ addrError: '' }); setStep(5); return;
+      if (!state.mode) { setState({ modeError: 'Elige Recojo o Delivery.' }); return; }
+      setState({ modeError: '' }); setStep(5); return;
     }
     if (st === 5) {
       var msg = buildMessage();
@@ -120,7 +139,7 @@
   }
 
   function reset() {
-    setState({ step: 0, name: '', qty: {}, cremas: [], mode: '', address: '', activeCat: 'Clásicos', nameError: '', catError: '', addrError: '', waLink: '#' });
+    setState({ step: 0, name: '', qty: {}, cremas: [], mode: '', activeCat: 'Clásicos', nameError: '', catError: '', modeError: '', waLink: '#' });
   }
 
   function escapeHtml(s) {
@@ -173,7 +192,10 @@
       '<div class="miau-schedule-row closed"><span>Domingo</span><span>Cerrado</span></div>' +
       '</div>' +
       '<button class="miau-start-btn" id="miau-start-btn">Hacer pedido 🌭</button>' +
-      '<div class="miau-social"><span>📷 @miau_kcrunch</span><span>▶ @miau.kcrunch</span></div>' +
+      '<div class="miau-social">' +
+      '<a class="miau-social-link" href="https://www.instagram.com/miau_kcrunch/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">' + INSTAGRAM_ICON + '</a>' +
+      '<a class="miau-social-link" href="https://www.tiktok.com/@miau.kcrunch?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok">' + TIKTOK_ICON + '</a>' +
+      '</div>' +
       '</div>'
     );
   }
@@ -181,7 +203,7 @@
   function renderNameStep() {
     return (
       '<div class="miau-name-step">' +
-      '<div class="miau-name-emoji">🐱</div>' +
+      '<img src="assets/gato-mezclado.png" alt="" class="miau-name-mascot" width="250" height="328">' +
       '<h2>¿Cómo te llamas?</h2>' +
       '<p>Así sabemos para quién es este festín.</p>' +
       '<input id="miau-name-input" class="miau-input' + (state.nameError ? ' error' : '') + '" value="' + escapeHtml(state.name) + '" placeholder="Tu nombre" autocomplete="name">' +
@@ -208,9 +230,13 @@
       var thumbBg = pink
         ? 'repeating-linear-gradient(45deg,#ffe3ea,#ffe3ea 6px,#ffd0dc 6px,#ffd0dc 12px)'
         : 'repeating-linear-gradient(45deg,#fff0d9,#fff0d9 6px,#ffe6c2 6px,#ffe6c2 12px)';
+      var photo = CATEGORY_IMAGES[p.cat];
+      var thumbInner = photo
+        ? '<img src="' + photo + '" alt="' + escapeHtml(p.cat) + '" width="640" height="640">'
+        : '<span>🥤</span>';
       return (
         '<div class="miau-product-card" style="border-color:' + cardBorder + cardExtra + '">' +
-        '<div class="miau-product-thumb" style="background:' + thumbBg + '"><span>foto</span></div>' +
+        '<div class="miau-product-thumb" style="background:' + thumbBg + '">' + thumbInner + '</div>' +
         '<div class="miau-product-info">' +
         '<div class="miau-product-name">' + escapeHtml(p.name) + '</div>' +
         '<div class="miau-product-price">' + soles(p.price) + '</div>' +
@@ -269,14 +295,13 @@
       '</button>' +
       '</div>' +
       (isDelivery ?
-        '<div class="miau-address-wrap">' +
-        '<label class="miau-address-label">Dirección de entrega</label>' +
-        '<textarea id="miau-address-input" class="miau-textarea' + (state.addrError ? ' error' : '') + '" rows="3" placeholder="Calle, número, referencia, distrito…">' + escapeHtml(state.address) + '</textarea>' +
-        '<div class="miau-address-note">El costo de delivery se coordina por WhatsApp según tu zona.</div>' +
-        (state.addrError ? '<div class="miau-error">⚠️ ' + escapeHtml(state.addrError) + '</div>' : '') +
+        '<div class="miau-delivery-note">' +
+        '<span class="miau-delivery-note-icon">📍</span>' +
+        '<span class="miau-delivery-note-text">Al enviar tu pedido por WhatsApp, comparte tu <b>ubicación actual</b> (📎 Adjuntar → Ubicación) para coordinar la entrega.</span>' +
         '</div>'
-        : (state.addrError ? '<div class="miau-error">⚠️ ' + escapeHtml(state.addrError) + '</div>' : '')
+        : ''
       ) +
+      (state.modeError ? '<div class="miau-error">⚠️ ' + escapeHtml(state.modeError) + '</div>' : '') +
       '</div>'
     );
   }
@@ -285,7 +310,7 @@
     var cremasText = state.cremas.length ? state.cremas.join(', ') : 'Ninguna';
     var entregaText = '—';
     if (state.mode === 'Recojo') entregaText = 'Recojo en tienda';
-    else if (state.mode === 'Delivery') entregaText = 'Delivery — ' + (state.address.trim() || '(sin dirección)');
+    else if (state.mode === 'Delivery') entregaText = 'Delivery — ubicación por WhatsApp';
 
     var itemsHtml = chosen().map(function (p) {
       var q = state.qty[p.id];
@@ -409,8 +434,8 @@
         setState({ cremas: on ? state.cremas.filter(function (x) { return x !== c; }) : state.cremas.concat([c]) });
         return;
       }
-      if ((el = e.target.closest('#miau-mode-recojo'))) { setState({ mode: 'Recojo', addrError: '' }); return; }
-      if ((el = e.target.closest('#miau-mode-delivery'))) { setState({ mode: 'Delivery', addrError: '' }); return; }
+      if ((el = e.target.closest('#miau-mode-recojo'))) { setState({ mode: 'Recojo', modeError: '' }); return; }
+      if ((el = e.target.closest('#miau-mode-delivery'))) { setState({ mode: 'Delivery', modeError: '' }); return; }
       if ((el = e.target.closest('#miau-edit-name'))) { setStep(1); return; }
       if ((el = e.target.closest('#miau-edit-catalog'))) { setStep(2); return; }
       if ((el = e.target.closest('#miau-edit-cremas'))) { setStep(3); return; }
@@ -427,13 +452,12 @@
 
     document.addEventListener('input', function (e) {
       if (e.target.id === 'miau-name-input') { state.name = e.target.value; state.nameError = ''; syncStatusOnly(); }
-      else if (e.target.id === 'miau-address-input') { state.address = e.target.value; state.addrError = ''; syncStatusOnly(); }
     });
 
     // On mobile the on-screen keyboard can cover the focused field; nudge it
     // into view once the keyboard has finished animating in.
     document.addEventListener('focusin', function (e) {
-      if (e.target.id === 'miau-name-input' || e.target.id === 'miau-address-input') {
+      if (e.target.id === 'miau-name-input') {
         setTimeout(function () {
           e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
         }, 300);

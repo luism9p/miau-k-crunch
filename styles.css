@@ -199,14 +199,22 @@ input, textarea {
   color: #fff; font-family: 'Fredoka'; font-weight: 700; font-size: 19px; padding: 17px;
   border-radius: 18px; box-shadow: 0 8px 20px rgba(196, 30, 58, .35); animation: miauPop .5s both;
 }
-.miau-social {
-  display: flex; justify-content: center; gap: 16px; margin-top: 16px;
-  font-size: 12px; font-weight: 700; color: #c58f97;
+.miau-social { display: flex; justify-content: center; gap: 14px; margin-top: 18px; }
+.miau-social-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; border-radius: 999px;
+  background: #fff; border: 2px solid #ffe0e6; color: #C41E3A;
+  transition: all .18s;
 }
+.miau-social-link:hover { background: #fff5f7; border-color: #C41E3A; }
+.miau-social-link svg { width: 20px; height: 20px; display: block; }
 
 /* STEP: NAME */
 .miau-name-step { animation: miauSlide .35s both; padding-top: 26px; }
-.miau-name-emoji { font-size: 40px; text-align: center; }
+.miau-name-mascot {
+  display: block; margin: 0 auto; width: 108px; height: auto;
+  aspect-ratio: 250 / 328; object-fit: contain;
+}
 .miau-name-step h2 {
   font-family: 'Fredoka'; font-weight: 700; font-size: clamp(21px, 6vw, 25px); color: #C41E3A;
   text-align: center; margin: 6px 0 4px;
@@ -220,12 +228,6 @@ input, textarea {
   min-height: 44px;
 }
 .miau-input.error { border-color: #C41E3A; }
-.miau-textarea {
-  width: 100%; padding: 14px 16px; font-size: 16px; font-weight: 600; color: #2a1416;
-  background: #fff; border: 2.5px solid #ffe0e6; border-radius: 16px; outline: none; resize: none;
-  min-height: 44px;
-}
-.miau-textarea.error { border-color: #C41E3A; }
 .miau-error { color: #C41E3A; font-size: 13px; font-weight: 800; margin-top: 9px; padding-left: 4px; }
 
 /* STEP: CATALOG */
@@ -252,9 +254,10 @@ input, textarea {
 .miau-product-thumb {
   width: 52px; height: 52px; aspect-ratio: 1 / 1; flex: none; border-radius: 13px;
   background: repeating-linear-gradient(45deg, #fff0d9, #fff0d9 6px, #ffe6c2 6px, #ffe6c2 12px);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
-.miau-product-thumb span { font-family: ui-monospace, Menlo, monospace; font-size: 9px; font-weight: 700; color: #c99; opacity: .85; }
+.miau-product-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.miau-product-thumb span { font-size: 22px; } /* Bebidas has no photo yet, falls back to an emoji glyph */
 .miau-product-info { flex: 1; min-width: 0; }
 .miau-product-name { font-family: 'Fredoka'; font-weight: 600; font-size: 15.5px; color: #2a1416; line-height: 1.25; overflow-wrap: break-word; }
 .miau-product-price { font-size: 13px; font-weight: 800; color: #C41E3A; margin-top: 3px; }
@@ -304,9 +307,14 @@ input, textarea {
 .miau-mode-icon { font-size: 30px; }
 .miau-mode-label { font-family: 'Fredoka'; font-weight: 700; font-size: 16px; margin-top: 6px; }
 .miau-mode-sub { font-size: 11.5px; font-weight: 600; opacity: .8; margin-top: 2px; }
-.miau-address-wrap { margin-top: 18px; animation: miauSlide .3s both; }
-.miau-address-label { font-size: 13px; font-weight: 800; color: #5a3d41; display: block; margin-bottom: 7px; }
-.miau-address-note { font-size: 12px; font-weight: 600; color: #c58f97; margin-top: 7px; padding-left: 2px; }
+.miau-delivery-note {
+  margin-top: 18px; animation: miauSlide .3s both;
+  display: flex; gap: 10px; align-items: flex-start;
+  background: #fff; border: 2px solid #ffe0e6; border-radius: 16px; padding: 14px 16px;
+}
+.miau-delivery-note-icon { font-size: 20px; flex: none; line-height: 1.3; }
+.miau-delivery-note-text { font-size: 13.5px; font-weight: 600; color: #5a3d41; line-height: 1.45; }
+.miau-delivery-note-text b { color: #C41E3A; }
 
 /* STEP: RESUMEN */
 .miau-resumen-step { animation: miauSlide .35s both; padding-top: 16px; }
@@ -398,7 +406,7 @@ button.miau-summary-edit { padding: 10px 8px; margin: -10px -8px -10px 0; } /* e
 /* ============ SMALL PHONES (iPhone SE / 320-360px) ============ */
 @media (max-width: 360px) {
   .miau-header { padding: 8px 12px; gap: 8px; }
-  .miau-scroll { padding: 0 12px calc(130px + env(safe-area-inset-bottom)); }
+  .miau-scroll { padding: 0 12px; }
   .miau-bottom-nav { padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); gap: 8px; }
   .miau-floating-cart { left: 12px; right: 12px; padding: 10px 12px; gap: 8px; }
 
