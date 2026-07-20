@@ -297,7 +297,10 @@
       (isDelivery ?
         '<div class="miau-delivery-note">' +
         '<span class="miau-delivery-note-icon">📍</span>' +
-        '<span class="miau-delivery-note-text">Al enviar tu pedido por WhatsApp, comparte tu <b>ubicación actual</b> (📎 Adjuntar → Ubicación) para coordinar la entrega.</span>' +
+        '<div class="miau-delivery-note-text">' +
+        '<div>Al enviar tu pedido por WhatsApp, comparte tu <b>ubicación actual</b> (📎 Adjuntar → Ubicación) para coordinar la entrega.</div>' +
+        '<div class="miau-delivery-note-sub">💵 El costo del delivery se coordina por WhatsApp según tu zona.</div>' +
+        '</div>' +
         '</div>'
         : ''
       ) +
