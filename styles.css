@@ -259,8 +259,12 @@ input, textarea {
 .miau-product-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 .miau-product-thumb span { font-size: 22px; } /* Bebidas has no photo yet, falls back to an emoji glyph */
 .miau-product-info { flex: 1; min-width: 0; }
-.miau-product-name { font-family: 'Fredoka'; font-weight: 600; font-size: 15.5px; color: #2a1416; line-height: 1.25; overflow-wrap: break-word; }
-.miau-product-price { font-size: 13px; font-weight: 800; color: #C41E3A; margin-top: 3px; }
+.miau-product-name { font-family: 'Fredoka'; font-weight: 700; font-size: 17px; color: #2a1416; line-height: 1.25; overflow-wrap: break-word; }
+.miau-product-desc {
+  margin-top: 8px; font-size: 14px; font-weight: 400; color: #8a6a6e;
+  line-height: 1.4; overflow-wrap: break-word;
+}
+.miau-product-price { font-size: 13px; font-weight: 800; color: #C41E3A; margin-top: 8px; }
 .miau-product-controls { display: flex; align-items: center; gap: 6px; flex: none; }
 .miau-qty-btn {
   width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;

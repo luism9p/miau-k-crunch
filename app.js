@@ -1,11 +1,12 @@
 (function () {
   'use strict';
 
-  var CATS = ['Clásicos', 'Ramen', 'Flaming Hot', 'Papa', 'Bebidas'];
+  var CATS = ['POPS', 'Clásicos', 'Ramen', 'Flaming Hot', 'Papa', 'Bebidas'];
   // One representative photo per category (all fillings within a category
   // look the same banderilla from the outside). Bebidas has no photo yet,
   // so it keeps the plain placeholder thumb.
   var CATEGORY_IMAGES = {
+    'POPS': 'assets/bolitas-queso.webp',
     'Clásicos': 'assets/clasico.webp',
     'Ramen': 'assets/ramen.webp',
     'Flaming Hot': 'assets/flaming-hot.webp',
@@ -13,6 +14,7 @@
   };
   var CREMAS = ['Mayonesa', 'Kétchup', 'Bbq', 'Mostaza', 'Rocoto'];
   var PRODUCTS = [
+    { id: 'po-bolitas', cat: 'POPS', name: 'POPS de queso', desc: 'Bolitas rellenas de queso, cubiertas de azúcar · 4 unid.', price: 10 },
     { id: 'cl-s', cat: 'Clásicos', name: 'Salchicha', price: 10 },
     { id: 'cl-sq', cat: 'Clásicos', name: 'Salchicha y queso', price: 11 },
     { id: 'cl-q', cat: 'Clásicos', name: 'Queso', price: 12 },
@@ -48,7 +50,7 @@
 
   var state = {
     step: 0, name: '', qty: {}, cremas: [], mode: '',
-    activeCat: 'Clásicos', nameError: '', catError: '', modeError: '', waLink: '#'
+    activeCat: 'POPS', nameError: '', catError: '', modeError: '', waLink: '#'
   };
 
   function setState(patch) {
@@ -139,7 +141,7 @@
   }
 
   function reset() {
-    setState({ step: 0, name: '', qty: {}, cremas: [], mode: '', activeCat: 'Clásicos', nameError: '', catError: '', modeError: '', waLink: '#' });
+    setState({ step: 0, name: '', qty: {}, cremas: [], mode: '', activeCat: 'POPS', nameError: '', catError: '', modeError: '', waLink: '#' });
   }
 
   function escapeHtml(s) {
@@ -239,6 +241,7 @@
         '<div class="miau-product-thumb" style="background:' + thumbBg + '">' + thumbInner + '</div>' +
         '<div class="miau-product-info">' +
         '<div class="miau-product-name">' + escapeHtml(p.name) + '</div>' +
+        (p.desc ? '<div class="miau-product-desc">' + escapeHtml(p.desc) + '</div>' : '') +
         '<div class="miau-product-price">' + soles(p.price) + '</div>' +
         '</div>' +
         '<div class="miau-product-controls">' +
