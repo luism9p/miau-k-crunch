@@ -1,20 +1,26 @@
 (function () {
   'use strict';
 
-  var CATS = ['POPS', 'Clásicos', 'Ramen', 'Flaming Hot', 'Papa', 'Bebidas'];
+  var CATS = ['Adicionales', 'Clásicos', 'Ramen', 'Flaming Hot', 'Cheesy', 'Papa', 'Bebidas'];
   // One representative photo per category (all fillings within a category
-  // look the same banderilla from the outside). Bebidas has no photo yet,
-  // so it keeps the plain placeholder thumb.
+  // look the same banderilla from the outside). Categories absent here fall
+  // back to CATEGORY_EMOJI (or an individual product's own `img`, see
+  // PRODUCTS) since not every category/product has a photo yet.
   var CATEGORY_IMAGES = {
-    'POPS': 'assets/bolitas-queso.webp',
     'Clásicos': 'assets/clasico.webp',
     'Ramen': 'assets/ramen.webp',
     'Flaming Hot': 'assets/flaming-hot.webp',
+    'Cheesy': 'assets/cheesy.webp',
     'Papa': 'assets/papa.webp'
   };
+  // Emoji fallback per category, used when neither the product nor its
+  // category has a photo (e.g. Bebidas, and the un-photographed items
+  // inside the mixed "Adicionales" category).
+  var CATEGORY_EMOJI = { 'Bebidas': '🥤', 'Adicionales': '🍟' };
   var CREMAS = ['Mayonesa', 'Kétchup', 'Bbq', 'Mostaza', 'Rocoto'];
   var PRODUCTS = [
-    { id: 'po-bolitas', cat: 'POPS', name: 'POPS de queso', desc: 'Bolitas rellenas de queso, cubiertas de azúcar · 4 unid.', price: 10 },
+    { id: 'po-bolitas', cat: 'Adicionales', name: 'POPS de queso', desc: 'Bolitas rellenas de queso, cubiertas de azúcar · 4 unid.', price: 10, img: 'assets/bolitas-queso.webp' },
+    { id: 'ad-papas', cat: 'Adicionales', name: 'Porción de papas fritas', price: 5, img: 'assets/papas-fritas.webp' },
     { id: 'cl-s', cat: 'Clásicos', name: 'Salchicha', price: 10 },
     { id: 'cl-sq', cat: 'Clásicos', name: 'Salchicha y queso', price: 11 },
     { id: 'cl-q', cat: 'Clásicos', name: 'Queso', price: 12 },
@@ -24,12 +30,16 @@
     { id: 'fh-s', cat: 'Flaming Hot', name: 'Salchicha', price: 11 },
     { id: 'fh-sq', cat: 'Flaming Hot', name: 'Salchicha y queso', price: 12 },
     { id: 'fh-q', cat: 'Flaming Hot', name: 'Queso', price: 13 },
+    { id: 'ch-s', cat: 'Cheesy', name: 'Salchicha', price: 11 },
+    { id: 'ch-sq', cat: 'Cheesy', name: 'Salchicha y queso', price: 12 },
+    { id: 'ch-q', cat: 'Cheesy', name: 'Queso', price: 13 },
     { id: 'pa-s', cat: 'Papa', name: 'Salchicha', price: 12 },
     { id: 'pa-sq', cat: 'Papa', name: 'Salchicha y queso', price: 13 },
     { id: 'pa-q', cat: 'Papa', name: 'Queso', price: 14 },
     { id: 'be-inka', cat: 'Bebidas', name: 'Inka Cola 600ml', price: 4 },
     { id: 'be-coca', cat: 'Bebidas', name: 'Coca Cola 600ml', price: 4 },
-    { id: 'be-sprite', cat: 'Bebidas', name: 'Sprite 500ml', price: 3 }
+    { id: 'be-sprite', cat: 'Bebidas', name: 'Sprite 500ml', price: 3 },
+    { id: 'be-guarana', cat: 'Bebidas', name: 'Guaraná 450ml', price: 2.5 }
   ];
   // 0=Sun..6=Sat : [openMin, closeMin] or null
   var SCHEDULE = { 0: null, 1: [1080, 1350], 2: [1080, 1350], 3: [1080, 1350], 4: [1080, 1350], 5: [1080, 1350], 6: [1080, 1380] };
@@ -50,7 +60,7 @@
 
   var state = {
     step: 0, name: '', qty: {}, cremas: [], mode: '',
-    activeCat: 'POPS', nameError: '', catError: '', modeError: '', waLink: '#'
+    activeCat: 'Adicionales', nameError: '', catError: '', modeError: '', waLink: '#'
   };
 
   function setState(patch) {
@@ -141,7 +151,7 @@
   }
 
   function reset() {
-    setState({ step: 0, name: '', qty: {}, cremas: [], mode: '', activeCat: 'POPS', nameError: '', catError: '', modeError: '', waLink: '#' });
+    setState({ step: 0, name: '', qty: {}, cremas: [], mode: '', activeCat: 'Adicionales', nameError: '', catError: '', modeError: '', waLink: '#' });
   }
 
   function escapeHtml(s) {
@@ -232,10 +242,10 @@
       var thumbBg = pink
         ? 'repeating-linear-gradient(45deg,#ffe3ea,#ffe3ea 6px,#ffd0dc 6px,#ffd0dc 12px)'
         : 'repeating-linear-gradient(45deg,#fff0d9,#fff0d9 6px,#ffe6c2 6px,#ffe6c2 12px)';
-      var photo = CATEGORY_IMAGES[p.cat];
+      var photo = p.img || CATEGORY_IMAGES[p.cat];
       var thumbInner = photo
-        ? '<img src="' + photo + '" alt="' + escapeHtml(p.cat) + '" width="640" height="640">'
-        : '<span>🥤</span>';
+        ? '<img src="' + photo + '" alt="' + escapeHtml(p.name) + '" width="640" height="640">'
+        : '<span>' + (CATEGORY_EMOJI[p.cat] || '🍢') + '</span>';
       return (
         '<div class="miau-product-card" style="border-color:' + cardBorder + cardExtra + '">' +
         '<div class="miau-product-thumb" style="background:' + thumbBg + '">' + thumbInner + '</div>' +
