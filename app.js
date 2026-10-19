@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var CATS = ['Adicionales', 'Clásicos', 'Ramen', 'Flaming Hot', 'Cheesy', 'Papa', 'Bebidas'];
+  var CATS = ['Korean Chicken', 'Adicionales', 'Clásicos', 'Ramen', 'Flaming Hot', 'Cheesy', 'Papa', 'Bebidas'];
   // One representative photo per category (all fillings within a category
   // look the same banderilla from the outside). Categories absent here fall
   // back to CATEGORY_EMOJI (or an individual product's own `img`, see
@@ -19,6 +19,7 @@
   var CATEGORY_EMOJI = { 'Bebidas': '🥤', 'Adicionales': '🍟' };
   var CREMAS = ['Mayonesa', 'Kétchup', 'Bbq', 'Mostaza', 'Rocoto'];
   var PRODUCTS = [
+    { id: 'kc-chicken', cat: 'Korean Chicken', name: 'Korean fried chicken', desc: '270gr de pollo acompañado de papas fritas', price: 18, img: 'assets/korean-chicken.webp' },
     { id: 'po-bolitas', cat: 'Adicionales', name: 'POPS de queso', desc: 'Bolitas rellenas de queso, cubiertas de azúcar · 4 unid.', price: 10, img: 'assets/bolitas-queso.webp' },
     { id: 'ad-papas', cat: 'Adicionales', name: 'Porción de papas fritas', price: 5, img: 'assets/papas-fritas.webp' },
     { id: 'cl-s', cat: 'Clásicos', name: 'Salchicha', price: 10 },
@@ -60,7 +61,7 @@
 
   var state = {
     step: 0, name: '', qty: {}, cremas: [], mode: '',
-    activeCat: 'Adicionales', nameError: '', catError: '', modeError: '', waLink: '#'
+    activeCat: 'Korean Chicken', nameError: '', catError: '', modeError: '', waLink: '#'
   };
 
   function setState(patch) {
@@ -151,7 +152,7 @@
   }
 
   function reset() {
-    setState({ step: 0, name: '', qty: {}, cremas: [], mode: '', activeCat: 'Adicionales', nameError: '', catError: '', modeError: '', waLink: '#' });
+    setState({ step: 0, name: '', qty: {}, cremas: [], mode: '', activeCat: 'Korean Chicken', nameError: '', catError: '', modeError: '', waLink: '#' });
   }
 
   function escapeHtml(s) {
