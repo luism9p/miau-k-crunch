@@ -19,7 +19,7 @@
   var CATEGORY_EMOJI = { 'Bebidas': '🥤', 'Adicionales': '🍟' };
   var CREMAS = ['Mayonesa', 'Kétchup', 'Bbq', 'Mostaza', 'Rocoto'];
   var PRODUCTS = [
-    { id: 'kc-chicken', cat: 'Korean Chicken', name: 'Korean fried chicken', desc: '270gr de pollo acompañado de papas fritas', price: 18, img: 'assets/korean-chicken.webp' },
+    { id: 'kc-chicken', cat: 'Korean Chicken', name: 'Korean fried chicken', desc: '270gr de pollo acompañado de salsa coreana y papas fritas', price: 20, img: 'assets/korean-chicken.webp' },
     { id: 'po-bolitas', cat: 'Adicionales', name: 'POPS de queso', desc: 'Bolitas rellenas de queso, cubiertas de azúcar · 4 unid.', price: 10, img: 'assets/bolitas-queso.webp' },
     { id: 'ad-papas', cat: 'Adicionales', name: 'Porción de papas fritas', price: 5, img: 'assets/papas-fritas.webp' },
     { id: 'cl-s', cat: 'Clásicos', name: 'Salchicha', price: 10 },
